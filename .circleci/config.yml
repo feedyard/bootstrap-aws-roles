@@ -31,9 +31,9 @@ jobs:
       - run:
           name: setup aws profile
           command: bash setup_profile.sh $sandbox_access_key $sandbox_secret_key $sandbox_region
-#      - run:
-#          name: initialize the terraform state backend
-#          command: invoke init
-#      - run:
-#          name: create terraform plan
-#          command: invoke plan sandbox $sandbox_access_key $sandbox_secret_key $sandbox_region $profile_account_id
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: create terraform plan
+          command: invoke plan sandbox $sandbox_access_key $sandbox_secret_key $sandbox_region $profile_account_id
