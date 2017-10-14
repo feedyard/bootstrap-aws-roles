@@ -31,7 +31,7 @@ EOF
 
 # attach policy to role
 resource "aws_iam_policy_attachment" "terraform_role_attachment_to_terraform_role_policy" {
-  provider = "aws.sandbox"
+  provider = "aws.${var.aws_account}"
   name = "terraform_policy_attachment"
   roles = ["${aws_iam_role.terraform_role.name}"]
   policy_arn = "${aws_iam_policy.terraform_role_policy.arn}"
