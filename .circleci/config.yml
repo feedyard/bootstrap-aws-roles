@@ -1,0 +1,39 @@
+defaults: &defaults
+  working_directory: ~/bootstrap-aws-roles
+  environment:
+    BASH_ENV: env
+  docker:
+    - image: quay.io/feedyard/circleci-infra-agent
+      auth:
+        username: $QUAY_USER
+        password: $QUAY_PASS
+
+version: 2
+
+jobs:
+
+  # until circleci supports parameterized worklfows there are jobs per account
+  sandbox_plan:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: docker info
+      - run:
+          name: decrypt secrets
+          command: invoke dec
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh sandbox $sandbox_region
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $sandbox_access_key $sandbox_secret_key $sandbox_region
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: create terraform plan
+          command: invoke plan sandbox $sandbox_access_key $sandbox_secret_key $sandbox_region $profile_account_id
