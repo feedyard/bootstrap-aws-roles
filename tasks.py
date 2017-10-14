@@ -2,7 +2,7 @@ from invoke import task
 
 @task
 def init(ctx):
-    ctx.run("terraform init")
+    ctx.run("terraform init -backend-config $CIRCLE_WORKING_DIRECTORY/backend.conf")
 
 @task
 def test(ctx):
@@ -16,7 +16,7 @@ def plan(ctx, account_id, access_key, secret_key, region, profile_account_id):
           '-var aws_secret_key={2} ' \
           '-var aws_region={3} ' \
           '-var profile_account_id={4} ' \
-          '-backend-config ./backend.conf'
+          '-backend-config $CIRCLE_WORKING_DIRECTORY/backend.conf'
 
     ctx.run(cmd.format(account_id, access_key, secret_key, region, profile_account_id))
 
