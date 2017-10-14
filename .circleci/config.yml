@@ -13,7 +13,7 @@ version: 2
 jobs:
 
   # until circleci supports parameterized worklfows there are jobs per account
-  sandbox_plan:
+  build:
     <<: *defaults
 
     steps:
