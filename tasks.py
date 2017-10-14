@@ -9,16 +9,16 @@ def test(ctx):
     ctx.run("bundle exec rspec spec")
 
 @task
-def plan(ctx, account_id, access_key, secret_key, region, profile_account_id):
+def plan(ctx, account, access_key, secret_key, region, profile_account_id):
     cmd = 'terraform plan ' \
-          '-var aws_account_id={0} ' \
+          '-var aws_account={0} ' \
           '-var aws_access_key={1} ' \
           '-var aws_secret_key={2} ' \
           '-var aws_region={3} ' \
           '-var profile_account_id={4} ' \
           '-backend-config $CIRCLE_WORKING_DIRECTORY/backend.conf'
 
-    ctx.run(cmd.format(account_id, access_key, secret_key, region, profile_account_id))
+    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
 
 @task
 def apply(ctx):
