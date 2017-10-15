@@ -13,7 +13,9 @@ version: 2
 jobs:
 
   # until circleci supports parameterized worklfows there are jobs per account
-  build:
+  # the bootstrap profile and roles pipeline includes three account
+  # sandbox -> nonprod -> prod
+  sandbox-plan:
     <<: *defaults
 
     steps:
@@ -37,3 +39,176 @@ jobs:
       - run:
           name: create terraform plan
           command: invoke plan sandbox $sandbox_access_key $sandbox_secret_key $sandbox_region $profile_account_id
+
+  sandbox-apply:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: 'docker info'
+      - run:
+          name: decrypt secrets
+          command: 'invoke dec'
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh sandbox $sandbox_region
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $sandbox_access_key $sandbox_secret_key $sandbox_region
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: apply terraform plan
+          command: invoke apply sandbox $sandbox_access_key $sandbox_secret_key $sandbox_region $profile_account_id
+      - run:
+          name: run tests
+          command: AWS_PROFILE=default rspec spec
+
+
+  # nonprod -> prod
+  nonprod-plan:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: docker info
+      - run:
+          name: decrypt secrets
+          command: invoke dec
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh nonprod $nonprod_region
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $nonprod_access_key $nonprod_secret_key $nonprod_region
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: create terraform plan
+          command: invoke plan nonprod $nonprod_access_key $nonprod_secret_key $nonprod_region $profile_account_id
+
+  nonprod-apply:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: 'docker info'
+      - run:
+          name: decrypt secrets
+          command: 'invoke dec'
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh nonprod $nonprod_region
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $nonprod_access_key $nonprod_secret_key $nonprod_region
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: apply terraform plan
+          command: invoke apply nonprod $nonprod_access_key $nonprod_secret_key $nonprod_region $profile_account_id
+      - run:
+          name: run tests
+          command: AWS_PROFILE=default rspec spec
+
+
+  # prod
+  prod-plan:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: docker info
+      - run:
+          name: decrypt secrets
+          command: invoke dec
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh prod $prod_region
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $prod_access_key $prod_secret_key $prod_region
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: create terraform plan
+          command: invoke plan prod $prod_access_key $prod_secret_key $prod_region $profile_account_id
+
+  prod-apply:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: 'docker info'
+      - run:
+          name: decrypt secrets
+          command: 'invoke dec'
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh prod $prod_region
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $prod_access_key $prod_secret_key $prod_region
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: apply terraform plan
+          command: invoke apply prod $prod_access_key $prod_secret_key $prod_region $profile_account_id
+      - run:
+          name: run tests
+          command: AWS_PROFILE=default rspec spec
+
+
+
+workflows:
+  version: 2
+  bootstrap-aws-profile-pipeline:
+    jobs:
+      - sandbox-plan
+      - approve-sandbox-plan:
+         type: approval
+         requires:
+           -  sandbox-plan
+      - sandbox-apply:
+          requires:
+            - approve-sandbox-plan
+      - nonprod-plan:
+          requires:
+            - sandbox-apply
+      - approve-nonprod-plan:
+        type: approval
+        requires:
+          -  nonprod-plan
+      - nonprod-apply:
+         requires:
+           - approve-nonprod-plan
+      - prod-plan:
+          requires:
+            - nonprod-apply
+      - approve-prod-plan:
+        type: approval
+        requires:
+          -  prod-plan
+      - prod-apply:
+         requires:
+           - approve-prod-plan

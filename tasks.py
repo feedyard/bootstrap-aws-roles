@@ -22,22 +22,23 @@ def plan(ctx, account, access_key, secret_key, region, profile_account_id):
 @task
 def apply(ctx):
     cmd = 'terraform apply ' \
-          '-var account_id=$account_id ' \
-          '-var access_key=$access_key ' \
-          '-var secret_key=$secret_key ' \
-          '-var region=$region'
+          '-var aws_account={0} ' \
+          '-var aws_access_key={1} ' \
+          '-var aws_secret_key={2} ' \
+          '-var aws_region={3} ' \
+          '-var profile_account_id={4}'
 
     ctx.run(cmd)
 
 @task
-def destroy(ctx):
+def destroy(ctx, account, access_key, secret_key, region, profile_account_id):
     cmd = 'terraform destroy ' \
           '-var account_id=$account_id ' \
           '-var access_key=$access_key ' \
           '-var secret_key=$secret_key ' \
           '-var region=$region -force'
 
-    ctx.run(cmd)
+    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
 
 
 
