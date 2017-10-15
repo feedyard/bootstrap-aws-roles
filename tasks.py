@@ -30,16 +30,6 @@ def apply(ctx, account, access_key, secret_key, region, profile_account_id):
 
     ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
 
-@task
-def destroy(ctx, account, access_key, secret_key, region, profile_account_id):
-    cmd = 'terraform destroy ' \
-          '-var account_id=$account_id ' \
-          '-var access_key=$access_key ' \
-          '-var secret_key=$secret_key ' \
-          '-var region=$region -force'
-
-    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
-
 
 
 @task

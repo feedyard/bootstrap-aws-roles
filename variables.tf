@@ -1,16 +1,4 @@
-# state files for x-account assume role configuration maintained in profile account
-# the ~/.aws/credentials file is populated at deployment runtime with the profile information
-//terraform {
-//  required_version = ">= 0.10.6"
-//
-//  backend "s3" {
-//    bucket  = "feedyard-sandbox-local"
-//    key     = "boostrap-sandbox-roles/auth.tfstate"
-//    region  = "us-east-1"
-//    profile = "bootstrap-sandbox"
-//  }
-//}
-
+# backend.conf is setup at the start based on target account
 terraform {
   required_version = ">= 0.10.6"
 
