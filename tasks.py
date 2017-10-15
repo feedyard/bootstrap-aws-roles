@@ -20,7 +20,7 @@ def plan(ctx, account, access_key, secret_key, region, profile_account_id):
     ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
 
 @task
-def apply(ctx):
+def apply(ctx, account, access_key, secret_key, region, profile_account_id):
     cmd = 'terraform apply ' \
           '-var aws_account={0} ' \
           '-var aws_access_key={1} ' \
@@ -28,7 +28,7 @@ def apply(ctx):
           '-var aws_region={3} ' \
           '-var profile_account_id={4}'
 
-    ctx.run(cmd)
+    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
 
 @task
 def destroy(ctx, account, access_key, secret_key, region, profile_account_id):
