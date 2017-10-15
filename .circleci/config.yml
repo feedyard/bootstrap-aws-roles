@@ -182,13 +182,13 @@ jobs:
 
 workflows:
   version: 2
-  bootstrap-aws-profile-pipeline:
+  bootstrap-aws-roles-pipeline:
     jobs:
       - sandbox-plan
       - approve-sandbox-plan:
-         type: approval
-         requires:
-           -  sandbox-plan
+          type: approval
+          requires:
+            - sandbox-plan
       - sandbox-apply:
           requires:
             - approve-sandbox-plan
@@ -196,19 +196,19 @@ workflows:
           requires:
             - sandbox-apply
       - approve-nonprod-plan:
-        type: approval
-        requires:
-          -  nonprod-plan
+          type: approval
+          requires:
+            - nonprod-plan
       - nonprod-apply:
-         requires:
-           - approve-nonprod-plan
+          requires:
+            - approve-nonprod-plan
       - prod-plan:
           requires:
             - nonprod-apply
       - approve-prod-plan:
-        type: approval
-        requires:
-          -  prod-plan
+          type: approval
+          requires:
+            -  prod-plan
       - prod-apply:
-         requires:
-           - approve-prod-plan
+          requires:
+            - approve-prod-plan
