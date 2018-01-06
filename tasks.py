@@ -22,6 +22,7 @@ def plan(ctx, account, access_key, secret_key, region, profile_account_id):
 @task
 def apply(ctx, account, access_key, secret_key, region, profile_account_id):
     cmd = 'terraform apply ' \
+          '-auto-approve ' \
           '-var aws_account={0} ' \
           '-var aws_access_key={1} ' \
           '-var aws_secret_key={2} ' \
