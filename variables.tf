@@ -1,6 +1,6 @@
 # backend.conf is setup at the start based on target account
 terraform {
-  required_version = ">= 0.10.6"
+  required_version = ">= 0.11"
 
   backend "s3" {
   }

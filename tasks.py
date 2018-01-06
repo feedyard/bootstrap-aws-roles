@@ -30,7 +30,16 @@ def apply(ctx, account, access_key, secret_key, region, profile_account_id):
 
     ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
 
+@task
+def destroy(ctx, account, access_key, secret_key, region, profile_account_id):
+    cmd = 'terraform destroy ' \
+          '-var aws_account={0} ' \
+          '-var aws_access_key={1} ' \
+          '-var aws_secret_key={2} ' \
+          '-var aws_region={3} ' \
+          '-var profile_account_id={4}'
 
+    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
 
 @task
 def enc(ctx, keyfile):
