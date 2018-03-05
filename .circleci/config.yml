@@ -242,7 +242,7 @@ workflows:
             - approve-profile-plan
       - sandbox-plan:
           requires:
-            -profile-apply
+            - profile-apply
       - approve-sandbox-plan:
           type: approval
           requires:
