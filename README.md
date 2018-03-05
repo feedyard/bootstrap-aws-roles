@@ -29,19 +29,4 @@ See Dockerfile in [circleci-infra-agent](https://github.com/feedyard/circleci-in
 ## circleci implementation
 
 The circleci workflow assumes the expected aws access information is provided via an encrypted file used to define
-env variables.
-
-```
-PROFILE_ACCESS_KEY_ID=
-PROFILE_SECRET_ACCESS_KEY=
-
-SANDBOX_ACCESS_KEY_ID=
-SANDBOX_SECRET_ACCESS_KEY=
-
-NONPROD_ACCESS_KEY_ID=
-NONPROD_SECRET_ACCESS_KEY=
-
-PROD_ACCESS_KEY_ID=
-PROD_SECRET_ACCESS_KEY=
-```
-
+env variables. See the pipeline config.yml for naming conventions.
