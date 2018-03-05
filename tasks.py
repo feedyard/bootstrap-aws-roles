@@ -6,47 +6,36 @@ def init(ctx):
 
 @task
 def test(ctx):
-    ctx.run("bundle exec rspec spec")
+    ctx.run("AWS_PROFILE=default rspec spec")
 
 @task
-def plan(ctx, account, access_key, secret_key, region, profile_account_id):
+def plan(ctx):
     cmd = 'terraform plan ' \
-          '-var aws_account={0} ' \
-          '-var aws_access_key={1} ' \
-          '-var aws_secret_key={2} ' \
-          '-var aws_region={3} ' \
-          '-var profile_account_id={4}'
+          '-var-file=./variables.tfvars'
 
-    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
+    ctx.run(cmd)
 
 @task
-def apply(ctx, account, access_key, secret_key, region, profile_account_id):
+def apply(ctx):
     cmd = 'terraform apply ' \
           '-auto-approve ' \
-          '-var aws_account={0} ' \
-          '-var aws_access_key={1} ' \
-          '-var aws_secret_key={2} ' \
-          '-var aws_region={3} ' \
-          '-var profile_account_id={4}'
+          '-var-file=./variables.tfvars'
 
-    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
+    ctx.run(cmd)
 
 @task
-def destroy(ctx, account, access_key, secret_key, region, profile_account_id):
+def destroy(ctx):
     cmd = 'terraform destroy ' \
-          '-var aws_account={0} ' \
-          '-var aws_access_key={1} ' \
-          '-var aws_secret_key={2} ' \
-          '-var aws_region={3} ' \
-          '-var profile_account_id={4}'
+          '-force ' \
+          '-var-file=./variables.tfvars'
 
-    ctx.run(cmd.format(account, access_key, secret_key, region, profile_account_id))
+    ctx.run(cmd)
 
 @task
-def enc(ctx, keyfile):
-    ctx.run("openssl aes-256-cbc -e -in {} -out env.ci -k $KEY".format(keyfile))
+def enc(ctx, file='local.env', encoded_file='env.ci'):
+    ctx.run("openssl aes-256-cbc -e -in {} -out {} -k $FEEDYARD_PIPELINE_KEY".format(file, encoded_file))
 
 @task
-def dec(ctx):
-    ctx.run("openssl aes-256-cbc -d -in env.ci -out env -k $KEY")
+def dec(ctx, encoded_file='env.ci', file='local.env'):
+    ctx.run("openssl aes-256-cbc -d -in {} -out {} -k $FEEDYARD_PIPELINE_KEY".format(encoded_file, file))
 

@@ -1,12 +1,9 @@
 defaults: &defaults
   working_directory: ~/bootstrap-aws-roles
   environment:
-    BASH_ENV: env
+    BASH_ENV: local.env
   docker:
     - image: quay.io/feedyard/circleci-infra-agent
-      auth:
-        username: $QUAY_USER
-        password: $QUAY_PASS
 
 version: 2
 
@@ -14,7 +11,60 @@ jobs:
 
   # until circleci supports parameterized worklfows there are jobs per account
   # the bootstrap profile and roles pipeline includes three account
-  # sandbox -> nonprod -> prod
+  # profile -> sandbox -> nonprod -> prod
+  profile-plan:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: docker info
+      - run:
+          name: decrypt secrets
+          command: invoke dec
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh profile
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: create terraform plan
+          command: invoke plan profile $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
+
+  profile-apply:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: confirm Docker
+          command: docker info
+      - run:
+          name: decrypt secrets
+          command: invoke dec
+      - run:
+          name: setup terraform state file location
+          command: bash setup_backend.sh profile
+      - run:
+          name: setup aws profile
+          command: bash setup_profile.sh $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
+      - run:
+          name: initialize the terraform state backend
+          command: invoke init
+      - run:
+          name: apply terraform plan
+          command: invoke apply profile $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
+      - run:
+          name: run tests
+          command: invoke test
+
   sandbox-plan:
     <<: *defaults
 
@@ -29,16 +79,16 @@ jobs:
           command: invoke dec
       - run:
           name: setup terraform state file location
-          command: bash setup_backend.sh sandbox $sandbox_region
+          command: bash setup_backend.sh sandbox
       - run:
           name: setup aws profile
-          command: bash setup_profile.sh $sandbox_access_key $sandbox_secret_key $sandbox_region
+          command: bash setup_profile.sh $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
       - run:
           name: initialize the terraform state backend
           command: invoke init
       - run:
           name: create terraform plan
-          command: invoke plan sandbox $sandbox_access_key $sandbox_secret_key $sandbox_region $profile_account_id
+          command: invoke plan sandbox $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
 
   sandbox-apply:
     <<: *defaults
@@ -48,25 +98,25 @@ jobs:
       - setup_remote_docker
       - run:
           name: confirm Docker
-          command: 'docker info'
+          command: docker info
       - run:
           name: decrypt secrets
-          command: 'invoke dec'
+          command: invoke dec
       - run:
           name: setup terraform state file location
-          command: bash setup_backend.sh sandbox $sandbox_region
+          command: bash setup_backend.sh sandbox
       - run:
           name: setup aws profile
-          command: bash setup_profile.sh $sandbox_access_key $sandbox_secret_key $sandbox_region
+          command: bash setup_profile.sh $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
       - run:
           name: initialize the terraform state backend
           command: invoke init
       - run:
           name: apply terraform plan
-          command: invoke apply sandbox $sandbox_access_key $sandbox_secret_key $sandbox_region $profile_account_id
+          command: invoke apply sandbox $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
       - run:
           name: run tests
-          command: AWS_PROFILE=default rspec spec
+          command: invoke test
 
 
   # nonprod -> prod
@@ -84,16 +134,16 @@ jobs:
           command: invoke dec
       - run:
           name: setup terraform state file location
-          command: bash setup_backend.sh nonprod $nonprod_region
+          command: bash setup_backend.sh nonprod
       - run:
           name: setup aws profile
-          command: bash setup_profile.sh $nonprod_access_key $nonprod_secret_key $nonprod_region
+          command: bash setup_profile.sh $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
       - run:
           name: initialize the terraform state backend
           command: invoke init
       - run:
           name: create terraform plan
-          command: invoke plan nonprod $nonprod_access_key $nonprod_secret_key $nonprod_region $profile_account_id
+          command: invoke plan nonprod $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
 
   nonprod-apply:
     <<: *defaults
@@ -103,25 +153,25 @@ jobs:
       - setup_remote_docker
       - run:
           name: confirm Docker
-          command: 'docker info'
+          command: docker info
       - run:
           name: decrypt secrets
-          command: 'invoke dec'
+          command: invoke dec
       - run:
           name: setup terraform state file location
-          command: bash setup_backend.sh nonprod $nonprod_region
+          command: bash setup_backend.sh nonprod
       - run:
           name: setup aws profile
-          command: bash setup_profile.sh $nonprod_access_key $nonprod_secret_key $nonprod_region
+          command: bash setup_profile.sh $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
       - run:
           name: initialize the terraform state backend
           command: invoke init
       - run:
           name: apply terraform plan
-          command: invoke apply nonprod $nonprod_access_key $nonprod_secret_key $nonprod_region $profile_account_id
+          command: invoke apply nonprod $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
       - run:
           name: run tests
-          command: AWS_PROFILE=default rspec spec
+          command: invoke test
 
 
   # prod
@@ -139,16 +189,16 @@ jobs:
           command: invoke dec
       - run:
           name: setup terraform state file location
-          command: bash setup_backend.sh prod $prod_region
+          command: bash setup_backend.sh prod
       - run:
           name: setup aws profile
-          command: bash setup_profile.sh $prod_access_key $prod_secret_key $prod_region
+          command: bash setup_profile.sh $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
       - run:
           name: initialize the terraform state backend
           command: invoke init
       - run:
           name: create terraform plan
-          command: invoke plan prod $prod_access_key $prod_secret_key $prod_region $profile_account_id
+          command: invoke plan prod $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
 
   prod-apply:
     <<: *defaults
@@ -158,33 +208,41 @@ jobs:
       - setup_remote_docker
       - run:
           name: confirm Docker
-          command: 'docker info'
+          command: docker info
       - run:
           name: decrypt secrets
-          command: 'invoke dec'
+          command: invoke dec
       - run:
           name: setup terraform state file location
-          command: bash setup_backend.sh prod $prod_region
+          command: bash setup_backend.sh prod
       - run:
           name: setup aws profile
-          command: bash setup_profile.sh $prod_access_key $prod_secret_key $prod_region
+          command: bash setup_profile.sh $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
       - run:
           name: initialize the terraform state backend
           command: invoke init
       - run:
           name: apply terraform plan
-          command: invoke apply prod $prod_access_key $prod_secret_key $prod_region $profile_account_id
+          command: invoke apply prod $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
       - run:
           name: run tests
-          command: AWS_PROFILE=default rspec spec
-
-
+          command: invoke test
 
 workflows:
   version: 2
   bootstrap-aws-roles-pipeline:
     jobs:
-      - sandbox-plan
+      - profile-plan
+      - approve-profile-plan:
+          type: approval
+          requires:
+            - profile-plan
+      - profile-apply:
+          requires:
+            - approve-profile-plan
+      - sandbox-plan:
+          requires:
+            -profile-apply
       - approve-sandbox-plan:
           type: approval
           requires:

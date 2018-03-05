@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 cat <<EOF > backend.conf
-key="feedyard-$1-roles/auth.tfstate"
+key="bootstrap-aws-roles/state.tfstate"
 bucket="feedyard-$1-state"
-region="$2"
+region="us-east-1"
 profile="default"
 EOF

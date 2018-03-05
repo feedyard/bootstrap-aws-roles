@@ -6,11 +6,13 @@ terraform {
   }
 }
 
-# env passed via encrypted file
-variable "aws_account" {}
-variable "aws_access_key" {}
-variable "aws_secret_key" {}
-variable "aws_region" {}
+provider "aws" {
+  version = "~> 1.10"
+  region = "${var.aws_region}"
+}
 
 variable "profile_account_id" {}
+variable "aws_region" { default = "us-east-1" }
+
+
 
