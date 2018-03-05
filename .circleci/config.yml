@@ -35,7 +35,7 @@ jobs:
           command: invoke init
       - run:
           name: create terraform plan
-          command: invoke plan profile $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
+          command: invoke plan $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
 
   profile-apply:
     <<: *defaults
@@ -60,7 +60,7 @@ jobs:
           command: invoke init
       - run:
           name: apply terraform plan
-          command: invoke apply profile $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
+          command: invoke apply $PROFILE_ACCESS_KEY_ID $PROFILE_SECRET_ACCESS_KEY
       - run:
           name: run tests
           command: invoke test
@@ -88,7 +88,7 @@ jobs:
           command: invoke init
       - run:
           name: create terraform plan
-          command: invoke plan sandbox $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
+          command: invoke plan $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
 
   sandbox-apply:
     <<: *defaults
@@ -113,7 +113,7 @@ jobs:
           command: invoke init
       - run:
           name: apply terraform plan
-          command: invoke apply sandbox $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
+          command: invoke apply $SANDBOX_ACCESS_KEY_ID $SANDBOX_SECRET_ACCESS_KEY
       - run:
           name: run tests
           command: invoke test
@@ -143,7 +143,7 @@ jobs:
           command: invoke init
       - run:
           name: create terraform plan
-          command: invoke plan nonprod $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
+          command: invoke plan $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
 
   nonprod-apply:
     <<: *defaults
@@ -168,7 +168,7 @@ jobs:
           command: invoke init
       - run:
           name: apply terraform plan
-          command: invoke apply nonprod $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
+          command: invoke apply $NONPROD_ACCESS_KEY_ID $NONPROD_SECRET_ACCESS_KEY
       - run:
           name: run tests
           command: invoke test
@@ -198,7 +198,7 @@ jobs:
           command: invoke init
       - run:
           name: create terraform plan
-          command: invoke plan prod $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
+          command: invoke plan $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
 
   prod-apply:
     <<: *defaults
@@ -223,7 +223,7 @@ jobs:
           command: invoke init
       - run:
           name: apply terraform plan
-          command: invoke apply prod $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
+          command: invoke apply $PROD_ACCESS_KEY_ID $PROD_SECRET_ACCESS_KEY
       - run:
           name: run tests
           command: invoke test
